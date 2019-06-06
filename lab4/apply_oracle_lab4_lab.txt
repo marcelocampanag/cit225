@@ -1,0 +1,99 @@
+SQL> 
+SQL> -- ------------------------------------------------------------------
+SQL> --  The following queries should be placed here:
+SQL> -- ------------------------------------------------------------------
+SQL> --  6(c) diagnostics for the individual_accounts.sql script.
+SQL> --  7(c) diagnostics for the update_members.sql script.
+SQL> --  8(c) diagnostics for the rental_inserts.sql script.
+SQL> --  9(c) diagnostics for the create_view_lab.sql script.
+SQL> -- ------------------------------------------------------------------
+SQL> 
+SQL> --  6(c) diagnostics for the individual_accounts.sql script.
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A20  HEADING "Name|(Last, First MI)"
+SQL> COL city		 FORMAT A12  HEADING "City"
+SQL> COL state_province  FORMAT A10  HEADING "State"
+SQL> COL telephone	 FORMAT A18  HEADING "Telephone"
+SQL> SELECT   m.account_number
+  2  ,	      c.last_name || ', ' || c.first_name
+  3  ||       CASE
+  4  		WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  5  	      END AS full_name
+  6  ,	      a.city
+  7  ,	      a.state_province
+  8  ,	      t.country_code || '-(' || t.area_code || ') ' || t.telephone_number AS telephone
+  9  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 10  	      address_lab a ON c.contact_lab_id = a.contact_lab_id INNER JOIN
+ 11  	      street_address_lab sa ON a.address_lab_id = sa.address_lab_id INNER JOIN
+ 12  	      telephone_lab t ON c.contact_lab_id = t.contact_lab_id AND a.address_lab_id = t.address_lab_id
+ 13  WHERE    m.member_type = (SELECT common_lookup_lab_id
+ 14  			       FROM   common_lookup_lab
+ 15  			       WHERE  common_lookup_context = 'MEMBER'
+ 16  			       AND    common_lookup_type = 'INDIVIDUAL');
+
+no rows selected
+
+SQL> 
+SQL> --  7(c) diagnostics for the update_members.sql script.
+SQL> 
+SQL> COLUMN member_lab_id	   FORMAT 999999 HEADING "MEMBER|ID"
+SQL> COLUMN members	       FORMAT 999999 HEADING "MEMBER|QTY #"
+SQL> COLUMN member_type        FORMAT 999999 HEADING "MEMBER|TYPE|ID #"
+SQL> COLUMN common_lookup_lab_id   FORMAT 999999 HEADING "MEMBER|LOOKUP|ID #"
+SQL> COLUMN common_lookup_type FORMAT A12    HEADING "COMMON|LOOKUP|TYPE"
+SQL> SELECT   m.member_lab_id
+  2  ,	      COUNT(contact_lab_id) AS MEMBERS
+  3  ,	      m.member_type
+  4  ,	      cl.common_lookup_lab_id
+  5  ,	      cl.common_lookup_type
+  6  FROM     member_lab m INNER JOIN contact_lab c
+  7  ON       m.member_lab_id = c.member_lab_id INNER JOIN common_lookup_lab cl
+  8  ON       m.member_type = cl.common_lookup_lab_id
+  9  GROUP BY m.member_lab_id
+ 10  ,	      m.member_type
+ 11  ,	      cl.common_lookup_lab_id
+ 12  ,	      cl.common_lookup_type
+ 13  ORDER BY m.member_lab_id;
+
+                 MEMBER  MEMBER COMMON                                          
+ MEMBER  MEMBER    TYPE  LOOKUP LOOKUP                                          
+     ID   QTY #    ID #    ID # TYPE                                            
+------- ------- ------- ------- ------------                                    
+   1001       2    1019    1019 GROUP                                           
+   1002       2    1019    1019 GROUP                                           
+   1003       3    1019    1019 GROUP                                           
+
+3 rows selected.
+
+SQL> 
+SQL> --  8(c) diagnostics for the rental_inserts.sql script.
+SQL> 
+SQL> COL member_lab_id	     FORMAT 9999 HEADING "Member|ID #"
+SQL> COL account_number  FORMAT A10  HEADING "Account|Number"
+SQL> COL full_name	 FORMAT A20  HEADING "Name|(Last, First MI)"
+SQL> COL rental_lab_lab_id	 FORMAT 9999 HEADING "Rent|ID #"
+SQL> COL rental_item_lab_id  FORMAT 9999 HEADING "Rent|Item|ID #"
+SQL> COL item_title	 FORMAT A26  HEADING "Item Title"
+SQL> SELECT   m.member_lab_id
+  2  ,	      m.account_number
+  3  ,	      c.last_name || ', ' || c.first_name
+  4  ||       CASE
+  5  		WHEN c.middle_name IS NOT NULL THEN ' ' || SUBSTR(c.middle_name,1,1)
+  6  	      END AS full_name
+  7  ,	      r.rental_lab_id
+  8  ,	      ri.rental_item_lab_id
+  9  ,	      i.item_title
+ 10  FROM     member_lab m INNER JOIN contact_lab c ON m.member_lab_id = c.member_lab_id INNER JOIN
+ 11  	      rental_lab r ON c.contact_lab_id = r.customer_id INNER JOIN
+ 12  	      rental_item_lab ri ON r.rental_lab_id = ri.rental_lab_id INNER JOIN
+ 13  	      item_lab i ON ri.item_lab_id = i.item_lab_id
+ 14  ORDER BY r.rental_lab_id;
+
+no rows selected
+
+SQL> 
+SQL> --  9(c) diagnostics for the create_view_lab.sql script.
+SQL> 
+SQL> 
+SQL> -- Close log file.
+SQL> SPOOL OFF
