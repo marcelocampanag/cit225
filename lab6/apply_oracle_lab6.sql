@@ -54,20 +54,7 @@ CONSTRAINT YN_PRICE CHECK( active_flag IN ('Y','N'))
 );
 
 ---3
-DROP INDEX COMMON_LOOKUP_N1;
-DROP INDEX COMMON_LOOKUP_U2;
 
-ALTER TABLE COMMON_LOOKUP
-ADD
-(COMMON_LOOKUP_TABLE VARCHAR2(30),
-COMMON_LOOKUP_COLUMN VARCHAR2(30),
-COOMMON_LOOKUP_CODE VARCHAR2(1)
-);
-
-UPDATE   common_lookup
-SET      common_lookup_table = 'ADDRESS'
-,        common_lookup_column = '	ADDRESS_TYPE'
-WHERE    common_lookup_context = 'MULTIPLE';
 
 UPDATE   common_lookup
 SET      common_lookup_table = 'TELEPHONE'
