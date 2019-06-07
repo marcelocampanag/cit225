@@ -55,10 +55,5 @@ CONSTRAINT YN_PRICE CHECK( active_flag IN ('Y','N'))
 
 ---3
 
-
-UPDATE   common_lookup
-SET      common_lookup_table = 'TELEPHONE'
-,        common_lookup_column = '	TELEPHONE_TYPE'
-WHERE    common_lookup_context = 'MULIPLE';
---5
+--4
 SPOOL OFF
