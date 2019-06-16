@@ -638,6 +638,7 @@ ON       c.contact_id = t.contact_id
 WHERE    c.last_name = 'Potter';
 
 -- EXERCISE 3.d
+-- insertar un nuevo rental asociado a un customer existente
 
 INSERT INTO rental
 ( rental_id
@@ -719,8 +720,8 @@ VALUES
   FROM     rental r
   ,        contact c
   WHERE    r.customer_id = c.contact_id
-  AND      c.last_name = 'Vizquel'
-  AND      c.first_name = 'Oscar')
+  AND      c.last_name = 'Potter'
+  AND      c.first_name = 'Harry')
 ,(SELECT   i.item_id
   FROM     item i
   ,        common_lookup cl
@@ -746,8 +747,8 @@ VALUES
 ,(SELECT   r.rental_id
   FROM     rental r inner join contact c
   ON       r.customer_id = c.contact_id
-  WHERE    c.last_name = 'Vizquel'
-  AND      c.first_name = 'Oscar')
+  WHERE    c.last_name = 'Potter'
+  AND      c.first_name = 'Harry')
 ,(SELECT   d.item_id
   FROM     item d join common_lookup cl
   ON       d.item_title = 'Star Wars II'
@@ -773,8 +774,8 @@ VALUES
   FROM     rental r
   ,        contact c
   WHERE    r.customer_id = c.contact_id
-  AND      c.last_name = 'Vizquel'
-  AND      c.first_name = 'Oscar')
+  AND      c.last_name = 'Potter'
+  AND      c.first_name = 'Ginny')
 ,(SELECT   d.item_id
   FROM     item d
   ,        common_lookup cl
@@ -801,8 +802,8 @@ VALUES
   FROM     rental r
   ,        contact c
   WHERE    r.customer_id = c.contact_id
-  AND      c.last_name = 'Vizquel'
-  AND      c.first_name = 'Doreen')
+  AND      c.last_name = 'Potter'
+  AND      c.first_name = 'Lily')
 ,(SELECT   d.item_id
   FROM     item d
   ,        common_lookup cl
@@ -815,5 +816,25 @@ VALUES
 , 1001
 , SYSDATE);
 
+COLUMN full_name   FORMAT A18
+COLUMN rental_id   FORMAT 9999
+COLUMN rental_days FORMAT A14
+COLUMN rentals     FORMAT 9999
+COLUMN items       FORMAT 9999
+SELECT   c.last_name||', '||c.first_name||' '||c.middle_name AS full_name
+,        r.rental_id
+,       (r.return_date - r.check_out_date) || '-DAY RENTAL' AS rental_days
+,        COUNT(DISTINCT r.rental_id) AS rentals
+,        COUNT(ri.rental_item_id) AS items
+FROM     rental r INNER JOIN rental_item ri
+ON       r.rental_id = ri.rental_id INNER JOIN contact c
+ON       r.customer_id = c.contact_id
+WHERE   (SYSDATE - r.check_out_date) < 15
+AND      c.last_name = 'Potter'
+GROUP BY c.last_name||', '||c.first_name||' '||c.middle_name
+,        r.rental_id
+,       (r.return_date - r.check_out_date) || '-DAY RENTAL'
+ORDER BY 2;
+-- falta que un insert sea un nuevo realese
 -- 4
 SPOOL OFF
