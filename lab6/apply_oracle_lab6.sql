@@ -638,7 +638,6 @@ ON       c.contact_id = t.contact_id
 WHERE    c.last_name = 'Potter';
 
 -- EXERCISE 3.d
--- insertar un nuevo rental asociado a un customer existente
 
 INSERT INTO rental
 ( rental_id
@@ -835,6 +834,273 @@ GROUP BY c.last_name||', '||c.first_name||' '||c.middle_name
 ,        r.rental_id
 ,       (r.return_date - r.check_out_date) || '-DAY RENTAL'
 ORDER BY 2;
--- falta que un insert sea un nuevo realese
--- 4
+
+-- EXERCISE 4
+
+DROP INDEX COMMON_LOOKUP_N1;
+DROP INDEX COMMON_LOOKUP_U2;
+
+COLUMN table_name FORMAT A14
+COLUMN index_name FORMAT A20
+SELECT   table_name
+,        index_name
+FROM     user_indexes
+WHERE    table_name = 'COMMON_LOOKUP';
+
+
+ALTER TABLE COMMON_LOOKUP ADD COMMON_LOOKUP_TABLE VARCHAR2(30);
+ALTER TABLE COMMON_LOOKUP ADD COMMON_LOOKUP_COLUMN VARCHAR2(30);
+ALTER TABLE COMMON_LOOKUP ADD COOMMON_LOOKUP_CODE VARCHAR2(1);
+
+SET NULL ''
+COLUMN table_name   FORMAT A14
+COLUMN column_id    FORMAT 9999
+COLUMN column_name  FORMAT A22
+COLUMN data_type    FORMAT A12
+SELECT   table_name
+,        column_id
+,        column_name
+,        CASE
+           WHEN nullable = 'N' THEN 'NOT NULL'
+           ELSE ''
+         END AS nullable
+,        CASE
+           WHEN data_type IN ('CHAR','VARCHAR2','NUMBER') THEN
+             data_type||'('||data_length||')'
+           ELSE
+             data_type
+         END AS data_type
+FROM     user_tab_columns
+WHERE    table_name = 'COMMON_LOOKUP'
+ORDER BY 2;
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+ORDER BY 1, 2, 3;
+
+UPDATE COMMON_LOOKUP SET   COMMON_LOOKUP_TABLE = COMMON_LOOKUP_CONTEXT WHERE  COMMON_LOOKUP_CONTEXT <> 'MULTIPLE';
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+ORDER BY 1, 2, 3;
+
+UPDATE COMMON_LOOKUP SET COMMON_LOOKUP_TABLE = 'ADDRESS' WHERE  COMMON_LOOKUP_CONTEXT = 'MULTIPLE' ;
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+ORDER BY 1, 2, 3;
+
+UPDATE COMMON_LOOKUP SET  COMMON_LOOKUP_COLUMN = CONCAT(COMMON_LOOKUP_TABLE, '_TYPE') WHERE COMMON_LOOKUP_CONTEXT <> 'MULTIPLE';
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+WHERE    common_lookup_table IN
+          (SELECT table_name
+           FROM   user_tables)
+ORDER BY 1, 2, 3;
+
+UPDATE COMMON_LOOKUP SET COMMON_LOOKUP_COLUMN  = 'ADDRESS_TYPE' WHERE  COMMON_LOOKUP_CONTEXT = 'MULTIPLE' ;
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+WHERE    common_lookup_table IN
+          (SELECT table_name
+           FROM   user_tables)
+ORDER BY 1, 2, 3;
+
+
+INSERT INTO COMMON_LOOKUP
+(COMMON_LOOKUP_ID
+,COMMON_LOOKUP_TABLE
+,COMMON_LOOKUP_COLUMN
+,COMMON_LOOKUP_TYPE
+,COMMON_LOOKUP_CONTEXT
+,COMMON_LOOKUP_MEANING
+,CREATED_BY
+,CREATION_DATE
+,LAST_UPDATED_BY
+,LAST_UPDATE_DATE
+) VALUES (
+COMMON_LOOKUP_s1.nextval
+,'TELEPHONE'
+,'TELEPHONE_TYPE'
+,'HOME'
+,'TELEPHONE'
+, 'Home'
+, 1
+, SYSDATE
+, 1
+, SYSDATE
+);
+
+INSERT INTO COMMON_LOOKUP
+(COMMON_LOOKUP_ID
+,COMMON_LOOKUP_TABLE
+,COMMON_LOOKUP_COLUMN
+,COMMON_LOOKUP_TYPE
+,COMMON_LOOKUP_CONTEXT
+,COMMON_LOOKUP_MEANING
+,CREATED_BY
+,CREATION_DATE
+,LAST_UPDATED_BY
+,LAST_UPDATE_DATE
+) VALUES (
+COMMON_LOOKUP_s1.nextval
+,'TELEPHONE'
+,'TELEPHONE_TYPE'
+,'WORK'
+,'TELEPHONE'
+, 'Work'
+, 1
+, SYSDATE
+, 1
+, SYSDATE
+);
+
+COLUMN common_lookup_context  FORMAT A14  HEADING "Common|Lookup Context"
+COLUMN common_lookup_table    FORMAT A12  HEADING "Common|Lookup Table"
+COLUMN common_lookup_column   FORMAT A18  HEADING "Common|Lookup Column"
+COLUMN common_lookup_type     FORMAT A18  HEADING "Common|Lookup Type"
+SELECT   common_lookup_context
+,        common_lookup_table
+,        common_lookup_column
+,        common_lookup_type
+FROM     common_lookup
+WHERE    common_lookup_table IN
+          (SELECT table_name
+           FROM   user_tables)
+ORDER BY 1, 2, 3;
+
+ALTER TABLE COMMON_LOOKUP
+  DROP COLUMN COMMON_LOOKUP_CONTEXT;
+
+SET NULL ''
+COLUMN table_name   FORMAT A14
+COLUMN column_id    FORMAT 9999
+COLUMN column_name  FORMAT A22
+COLUMN data_type    FORMAT A12
+SELECT   table_name
+,        column_id
+,        column_name
+,        CASE
+           WHEN nullable = 'N' THEN 'NOT NULL'
+           ELSE ''
+         END AS nullable
+,        CASE
+           WHEN data_type IN ('CHAR','VARCHAR2','NUMBER') THEN
+             data_type||'('||data_length||')'
+           ELSE
+             data_type
+         END AS data_type
+FROM     user_tab_columns
+WHERE    table_name = 'COMMON_LOOKUP'
+ORDER BY 2;
+
+ALTER TABLE COMMON_LOOKUP MODIFY ( COMMON_LOOKUP_TABLE NOT NULL);
+ALTER TABLE COMMON_LOOKUP MODIFY ( COMMON_LOOKUP_COLUMN NOT NULL);
+
+COLUMN constraint_name   FORMAT A22  HEADING "Constraint Name"
+COLUMN search_condition  FORMAT A36  HEADING "Search Condition"
+COLUMN constraint_type   FORMAT A10  HEADING "Constraint|Type"
+SELECT   uc.constraint_name
+,        uc.search_condition
+,        uc.constraint_type
+FROM     user_constraints uc INNER JOIN user_cons_columns ucc
+ON       uc.table_name = ucc.table_name
+AND      uc.constraint_name = ucc.constraint_name
+WHERE    uc.table_name = UPPER('common_lookup')
+AND      uc.constraint_type IN (UPPER('c'),UPPER('p'))
+ORDER BY uc.constraint_type DESC
+,        uc.constraint_name;
+
+
+CREATE UNIQUE INDEX CLOOKUP_U1
+    ON COMMON_LOOKUP ( COMMON_LOOKUP_TABLE, COMMON_LOOKUP_COLUMN, COMMON_LOOKUP_TYPE );
+
+COLUMN sequence_name   FORMAT A22 HEADING "Sequence Name"
+COLUMN column_position FORMAT 999 HEADING "Column|Position"
+COLUMN column_name     FORMAT A22 HEADING "Column|Name"
+SELECT   UI.index_name
+,        uic.column_position
+,        uic.column_name
+FROM     user_indexes UI INNER JOIN user_ind_columns uic
+ON       UI.index_name = uic.index_name
+AND      UI.table_name = uic.table_name
+WHERE    UI.table_name = UPPER('common_lookup')
+ORDER BY UI.index_name
+,        uic.column_position;
+
+
+
+UPDATE TELEPHONE SET TELEPHONE_TYPE  = '1016' WHERE  TELEPHONE_TYPE = '1008' ;
+
+COLUMN common_lookup_table  FORMAT A14 HEADING "Common|Lookup Table"
+COLUMN common_lookup_column FORMAT A14 HEADING "Common|Lookup Column"
+COLUMN common_lookup_type   FORMAT A8  HEADING "Common|Lookup|Type"
+COLUMN count_dependent      FORMAT 999 HEADING "Count of|Foreign|Keys"
+COLUMN count_lookup         FORMAT 999 HEADING "Count of|Primary|Keys"
+SELECT   cl.common_lookup_table
+,        cl.common_lookup_column
+,        cl.common_lookup_type
+,        COUNT(a.address_id) AS count_dependent
+,        COUNT(DISTINCT cl.common_lookup_table) AS count_lookup
+FROM     address a RIGHT JOIN common_lookup cl
+ON       a.address_type = cl.common_lookup_id
+WHERE    cl.common_lookup_table = 'ADDRESS'
+AND      cl.common_lookup_column = 'ADDRESS_TYPE'
+AND      cl.common_lookup_type IN ('HOME','WORK')
+GROUP BY cl.common_lookup_table
+,        cl.common_lookup_column
+,        cl.common_lookup_type
+UNION
+SELECT   cl.common_lookup_table
+,        cl.common_lookup_column
+,        cl.common_lookup_type
+,        COUNT(t.telephone_id) AS count_dependent
+,        COUNT(DISTINCT cl.common_lookup_table) AS count_lookup
+FROM     telephone t RIGHT JOIN common_lookup cl
+ON       t.telephone_type = cl.common_lookup_id
+WHERE    cl.common_lookup_table = 'TELEPHONE'
+AND      cl.common_lookup_column = 'TELEPHONE_TYPE'
+AND      cl.common_lookup_type IN ('HOME','WORK')
+GROUP BY cl.common_lookup_table
+,        cl.common_lookup_column
+,        cl.common_lookup_type;
+
+
 SPOOL OFF
