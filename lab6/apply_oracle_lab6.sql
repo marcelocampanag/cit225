@@ -121,5 +121,3 @@ AND      uc.constraint_type = 'C';
 
 
 --5
-
-
