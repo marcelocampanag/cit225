@@ -64,9 +64,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'YES'
 ,'Yes'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'PRICE'
 ,'ACTIVE_FLAG'
@@ -87,9 +87,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'NO'
 ,'No'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'PRICE'
 ,'ACTIVE_FLAG'
@@ -129,9 +129,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'1-DAY RENTAL'
 ,'1-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'PRICE'
 ,'PRICE_TYPE'
@@ -152,9 +152,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'3-DAY RENTAL'
 ,'3-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'PRICE'
 ,'PRICE_TYPE'
@@ -175,9 +175,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'5-DAY RENTAL'
 ,'5-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'PRICE'
 ,'PRICE_TYPE'
@@ -199,9 +199,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'1-DAY RENTAL'
 ,'1-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'RENTAL_ITEM'
 ,'RENTAL_ITEM_TYPE'
@@ -222,9 +222,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'3-DAY RENTAL'
 ,'3-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'RENTAL_ITEM'
 ,'RENTAL_ITEM_TYPE'
@@ -245,9 +245,9 @@ VALUES
 (COMMON_LOOKUP_s1.nextval
 ,'5-DAY RENTAL'
 ,'5-Day Rental'
-,1
+,1001
 ,SYSDATE
-,1
+,1001
 ,SYSDATE
 ,'RENTAL_ITEM'
 ,'RENTAL_ITEM_TYPE'
@@ -385,8 +385,48 @@ AND      column_name = 'RENTAL_ITEM_TYPE';
 
 -- Insert step #4 statements here.
 
+SELECT   i.item_id,af.active_flag,cl.common_lookup_id AS price_type,cl.common_lookup_type AS price_desc
+,        CASE
+            WHEN  af.active_flag = 'N' THEN i.release_date
+            --WHEN  af.active_flag = 'Y' AND i.release_date = TRUNC(SYSDATE)-1 THEN SYSDATE
+            ELSE  i.release_date
+         END AS start_date,
+        CASE
+        WHEN  af.active_flag = 'N' THEN TRUNC(i.release_date)+30
+        WHEN  af.active_flag = 'Y' THEN NULL
+        ELSE  NULL
+         END AS end_date,
+        CASE
+           WHEN  af.active_flag = 'N' THEN cl.common_lookup_code
+           WHEN  af.active_flag = 'Y' AND cl.common_lookup_code = '1' THEN '3'
+           WHEN  af.active_flag = 'Y' AND cl.common_lookup_code = '3' THEN '10'
+           WHEN  af.active_flag = 'Y' AND cl.common_lookup_code = '5' THEN '15'
+           ELSE  NULL
+         END AS amount
+FROM     item i CROSS JOIN
+        (SELECT 'Y' AS active_flag FROM dual
+         UNION ALL
+         SELECT 'N' AS active_flag FROM dual) af CROSS JOIN
+        (SELECT '1' AS rental_days FROM dual
+         UNION ALL
+         SELECT '3' AS rental_days FROM dual
+         UNION ALL
+         SELECT '5' AS rental_days FROM dual) dr INNER JOIN
+         common_lookup cl ON dr.rental_days = SUBSTR(cl.common_lookup_type,1,1)
+WHERE    cl.common_lookup_table = 'PRICE'
+AND      cl.common_lookup_column = 'PRICE_TYPE'
+AND NOT ( af.active_flag = 'N' AND i.release_date = TRUNC(SYSDATE)-1)
+ORDER BY 1, 2, 3;
+
+COLUMN item_id     FORMAT 9999 HEADING "ITEM|ID"
+COLUMN active_flag FORMAT A6   HEADING "ACTIVE|FLAG"
+COLUMN price_type  FORMAT 9999 HEADING "PRICE|TYPE"
+COLUMN price_desc  FORMAT A12  HEADING "PRICE DESC"
+COLUMN start_date  FORMAT A10  HEADING "START|DATE"
+COLUMN end_date    FORMAT A10  HEADING "END|DATE"
+COLUMN amount      FORMAT 9999 HEADING "AMOUNT"
 -- Close log file.
 SPOOL OFF
 
 -- Make all changes permanent.
--- COMMIT;
+ COMMIT;
